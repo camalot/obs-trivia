@@ -1,0 +1,30 @@
+{{#section 'head'}}
+<link rel="stylesheet" href="/assets/css/overlay.css" />
+{{/section}}
+
+
+<div class="trivia hidden" data-channel="{{channel}}" data-poll="5000">
+	<div class="category"></div>
+	<div class="question"></div>
+	<ol class="answers"></ol>
+
+	<div class="help">Use <code>!a #</code> to guess.</div>
+
+	<div class="progress">
+		<div class="bar"></div>
+	</div>
+</div>
+
+<div class="correct hidden">
+	<div class="message"><span class="who"></span> got the correct answer!</div>
+	<div class="answer"></div>
+</div>
+
+<div class="no-answer hidden">
+	<div class="answer"></div>
+</div>
+
+
+{{#section 'head'}}
+<script src="/assets/scripts/overlay.js"></script>
+{{/section}}

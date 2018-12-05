@@ -1,0 +1,44 @@
+{
+  "name": "obs-trivia",
+  "version": "1.0.0-snapshot",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ./bin/www",
+    "exec": "npm update && nodemon ./bin/www",
+    "test": "jshint **/*.js --verbose && eslint . && istanbul cover --include-all-sources $(npm bin)/mocha test/* --reporter spec"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "async": "^2.6.0",
+    "body-parser": "^1.18.3",
+    "cookie-parser": "^1.4.3",
+    "debug": "~4.1.0",
+    "dotenv": "~6.1.0",
+    "express": "~4.16.4",
+    "express-session": "~1.15.6",
+    "fs-extra": "~7.0.1",
+    "hbs": "~4.0.1",
+    "mongodb": "~3.1.10",
+    "merge": "^1.2.1",
+    "moment": "~2.22.2",
+    "moment-timezone": "~0.5.23",
+    "morgan": "~1.9.1",
+    "promise": "^8.0.2",
+    "serve-favicon": "^2.4.5",
+    "shortid": "^2.2.14",
+    "tmi.js": "~1.2.1"
+  },
+  "devDependencies": {
+    "chai": "~4.2.0",
+    "grunt": "~1.0.3",
+    "grunt-contrib-jshint": "~2.0.0",
+    "grunt-jscs": "~3.0.1",
+    "istanbul": "~0.4.5",
+    "jshint": "~2.9.6",
+    "load-grunt-tasks": "~4.0.0",
+    "mocha": "~5.2.0",
+    "nodemon": "~1.18.7"
+  }
+}
