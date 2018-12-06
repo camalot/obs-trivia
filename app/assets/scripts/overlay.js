@@ -32,6 +32,9 @@ $(function () {
 
 		let na = $(".answer", noAnswer);
 		na.empty();
+
+		trivia.data("id", '');
+
 	};
 
 	let stopAnswerTimer = () => {
@@ -81,7 +84,10 @@ $(function () {
 				currentQuestion = null;
 				currentCountdown = 0;
 				outOfTime = false;
+				trivia.data("id", '');
+
 				stopAnswerTimer();
+
 				console.log("successfully cleared question.");
 			}
 		});
@@ -136,7 +142,8 @@ $(function () {
 	};
 
 	setInterval(function () {
-		$.ajax(`/api/trivia/${channel}`, {
+		let id = trivia.data("id");
+		$.ajax(`/api/trivia/${channel}/${id}`, {
 			success: (data, text, xhr) => {
 
 				if (data === null) {
@@ -165,6 +172,7 @@ $(function () {
 
 						// timer to remove and reset
 					} else {
+
 						correct.addClass("hidden");
 						console.log(currentQuestion);
 						// no correct guess yet
@@ -172,6 +180,8 @@ $(function () {
 						q.html(currentQuestion.question);
 						let c = $(".category", trivia);
 						c.html(currentQuestion.category);
+
+						trivia.data("id", currentQuestion.id);
 
 						let a = $(".answers", trivia);
 						a.empty();

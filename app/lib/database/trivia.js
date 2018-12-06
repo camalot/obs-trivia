@@ -1,54 +1,31 @@
 "use strict";
 
 const MongoDatabase = require("../MongoDatabase");
-const DATABASE_NAME = "trivia";
-
+const config = require('../../config');
+const dbconfig = config.mongodb;
+const DATABASE_NAME = dbconfig.DATABASE;
+const COLLECTION_NAME = "questions";
 module.exports = {
 	init: () => {
 		return new Promise((resolve, reject) => {
-			let mongodb = new MongoDatabase(DATABASE_NAME);
-			return mongodb.connect()
-				.then(client => {
-					return resolve({
-						id: 'DUMMY',
-						channel: "DUMMY",
-						question: "DUMMY",
-						category: "DUMMY",
-						answers: ["DUMMY"],
-						correctAnswer: 0,
-						correctGuess: null,
-						incorrectGuesses: [],
-						difficulty: "DUMMY"});
-				})
-				.then(() => {
-					return mongodb.close();
-				})
-				.catch(err => {
-					console.error(err);
-					return reject(err);
-				});
+			return resolve();
 		});
 	},
-	get: id => {
-		return new Promise((resolve, reject) => {
-			let mongodb = new MongoDatabase(DATABASE_NAME);
-			return mongodb.connect()
-				.then(client => {
-					return client
-						.db()
-						.collection("questions")
-						.findOne({ id: id });
-				})
-				.then(user => {
-					return resolve(user);
-				})
-				.then(() => {
-					return mongodb.close();
-				})
-				.catch(err => {
-					console.error(err);
-					return reject(err);
-				});
-		});
+	all: (channel) => {
+		let mongodb = new MongoDatabase(DATABASE_NAME);
+		return mongodb.select(COLLECTION_NAME, { channel: channel });
+	},
+	truncate: (channel) => {
+		let mongodb = new MongoDatabase(DATABASE_NAME);
+		return mongodb.delete(COLLECTION_NAME, { channel: channel });
+	},
+	insert: (channel, object) => {
+		let mongodb = new MongoDatabase(DATABASE_NAME);
+		object.channel = channel;
+		return mongodb.insert(COLLECTION_NAME, object);
+	},
+	get: (channel, id) => {
+		let mongodb = new MongoDatabase(DATABASE_NAME);
+		return mongodb.get(COLLECTION_NAME, { channel: channel, id: id });
 	}
 };

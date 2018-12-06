@@ -32,9 +32,9 @@ chat.initialize()
 	.then((c) => {
 		return chat.register();
 	})
-	// .then(() => {
-	// 	return triviaDb.init();
-	// })
+	.then(() => {
+		return triviaDb.init();
+	})
 	.catch(err => {
 		console.error(err);
 		throw err;
