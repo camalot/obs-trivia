@@ -55,11 +55,46 @@ class MongoDatabase {
 						return resolve(null);
 					}
 				})
+				.then(() => {
+					return _this.close();
+				})
 				.catch(err => {
 					console.error(err);
 					return reject(err);
 				});
 
+		});
+	}
+
+	find (collection, filter, sort, limit) {
+		var _this = this;
+		return new Promise((resolve, reject) => {
+			return _this.connect()
+				.then((client) => {
+					return client.db().collection(collection);
+				})
+				.then((col) => {
+					console.log("begin find");
+					return col.find(filter).sort(sort).limit(limit).toArray();
+				})
+				.then((result) => {
+					console.log("result: ");
+					if(result && result.length > 0) {
+						console.log(result);
+						return resolve(result);
+					} else {
+						console.log("NOTHING");
+						return resolve(null);
+					}
+				})
+				.then(() => {
+					console.log("close db");
+					return _this.close();
+				})
+				.catch((err) => {
+					console.error(err);
+					return reject(err);
+				});
 		});
 	}
 
@@ -76,6 +111,9 @@ class MongoDatabase {
 				.then(() => {
 					return resolve();
 				})
+				.then(() => {
+					return _this.close();
+				})
 				.catch((err) => {
 					console.error(err);
 					return reject(err);
@@ -87,9 +125,32 @@ class MongoDatabase {
 		return this.delete(collection);
 	}
 
-	update(collection, filter) {
+	updateOne(collection, filter, update, options) {
+		var _this = this;
 		return new Promise((resolve, reject) => {
-			return reject('Not implemented');
+			return _this.connect()
+				.then((client) => {
+					return client.db().collection(collection);
+				})
+				.then((col) => {
+					console.log(update);
+					return col.updateOne(filter, { $set: update }, options || { upsert: true, returnOriginal: false });
+				})
+				.then(data => {
+					console.log(data);
+					if(data.result) {
+						return resolve(data.result);
+					} else {
+						return resolve(null);
+					}
+				})
+				.then(() => {
+					return _this.close();
+				})
+				.catch((err) => {
+					console.error(err);
+					return reject(err);
+				});
 		});
 	}
 
@@ -129,7 +190,7 @@ class MongoDatabase {
 				})
 				.then(() => {
 					console.log("close db");
-					return _this.mongodb.close();
+					return _this.close();
 				})
 				.then(() => {
 					console.log("return object");
@@ -146,7 +207,7 @@ class MongoDatabase {
 	get(collection, query) {
 		let _this = this;
 		return new Promise((resolve, reject) => {
-			return _this.mongodb.connect()
+			return _this.connect()
 				.then(client => {
 					return client
 						.db()
@@ -157,7 +218,7 @@ class MongoDatabase {
 					return resolve(result);
 				})
 				.then(() => {
-					return _this.mongodb.close();
+					return _this.close();
 				})
 				.catch(err => {
 					console.error(err);
@@ -170,8 +231,7 @@ class MongoDatabase {
 		let _this = this;
 		return new Promise((resolve, reject) => {
 			if (_this.db) {
-				return _this.db
-					.close()
+				return _this.mongodb.close()
 					.then(() => {
 						return resolve();
 					})

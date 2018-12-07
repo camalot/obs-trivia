@@ -76,7 +76,9 @@ $(function () {
 		}
 		// clear question
 		console.log("clear question");
-		$.ajax(`/api/trivia/clear/${channel}`, {
+		let id = trivia.data("id");
+
+		$.ajax(`/api/trivia/clear/${channel}/${id}`, {
 			success: (data, text, xhr) => {
 				correct.addClass("hidden");
 				trivia.addClass("hidden");
@@ -130,13 +132,6 @@ $(function () {
 				bar.removeClass("warn").removeClass("good").addClass("hurry");
 			}
 			$(".bar", trivia).css("width", `${100 - percentage}%`);
-			// $(".bar", trivia).animate({
-			// 	width: `${100 - percentage}%`
-			// }, 200, "linear", () => {
-			// 	console.log("animate complete")
-			// 	// completed animation
-			// });
-
 			currentCountdown += 100;
 		}, 100);
 	};
@@ -152,7 +147,7 @@ $(function () {
 				}
 
 				currentQuestion = data;
-
+				console.log(data);
 				if (!outOfTime) {
 					if (currentQuestion.correctGuess) {
 						console.log("correct guess");

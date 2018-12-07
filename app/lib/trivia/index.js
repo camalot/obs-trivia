@@ -2,6 +2,7 @@
 const https = require('https');
 const shortid = require('shortid');
 const triviaDb = require('../database/trivia');
+const dateUtil = require('../utils').date;
 
 let getAnswers = (data) => {
 	let answers = data.incorrect_answers;
@@ -41,7 +42,7 @@ let _new = (channel) => {
 						correctGuess: null,
 						incorrectGuesses: [],
 						difficulty: data.difficulty,
-						created: Date.UTC(),
+						created: dateUtil.utc(),
 						ended: null
 					};
 					console.log("begin insert");
@@ -64,10 +65,14 @@ let _new = (channel) => {
 let _get = (channel, id) => {
 	return new Promise((resolve, reject) => {
 		if (!id) {
-			console.log("new question");
-			return _new(channel)
-			.then(r => resolve(r))
-			.catch(err => reject(err));
+			console.log("get latest");
+			return _getLatest(channel)
+				.then(r => {
+					return resolve(r);
+				})
+				.catch(err => {
+					return reject(err);
+				});
 		} else {
 			console.log(`get: ${id}:${channel}`);
 			return triviaDb.get(channel, id)
@@ -83,6 +88,22 @@ let _get = (channel, id) => {
 	});
 };
 
+let _getLatest = (channel) => {
+	return new Promise((resolve, reject) => {
+		return triviaDb.find(channel, { ended: null }, { created: -1 }, 1)
+			.then((data) => {
+				if(!data && data.length > 0) {
+					return resolve(null);
+				} else {
+					return resolve(data[0]);
+				}
+			})
+			.catch((err) => {
+				return reject(err);
+			});
+	});
+};
+
 let _currentQuestion = null;
 
 // https://opentdb.com/api.php?amount=1
@@ -90,15 +111,16 @@ module.exports = {
 	activeQuestion: _currentQuestion,
 	create: _new,
 	get: _get,
+	latest: _getLatest,
 	all: (channel) => triviaDb.all(channel),
-	answer: (channel, username, guessIndex) => {
+	answer: (channel, id, username, guessIndex) => {
 		return new Promise((resolve, reject) => {
-			_get(channel)
+			return _get(channel, id)
 				.then((data) => {
 					let result = data;
-
+					result.channel = channel;
 					let isCorrect = result.correctAnswer === guessIndex;
-					result.ended = Date.UTC();
+					result.ended = dateUtil.utc();
 					if (isCorrect) {
 						result.correctGuess = username;
 					} else {
@@ -106,23 +128,40 @@ module.exports = {
 							result.incorrectGuesses.push(username);
 						}
 					}
-
-
-					return resolve(false);
-					// write the update to the file.
-					// return _writeQuestionToFile(channel, result)
-					// 	.then(() => {
-					// 		return resolve(result.correctAnswer === guessIndex);
-					// 	});
+					return triviaDb.update(channel, result);
+				})
+				.then((result) => {
+					if (result) {
+						let isCorrect = result.correctAnswer === guessIndex;
+						return resolve(isCorrect);
+					} else {
+						return resolve(false);
+					}
 				}).catch((err) => {
 					return reject(err);
 				});
 		});
 	},
+	delete: (channel, id) => triviaDb.delete(channel, id),
 	truncate: (channel) => triviaDb.truncate(channel || "_DUMMY_"),
-	clear: (channel) => {
+	clear: (channel, id) => {
 		return new Promise((resolve, reject) => {
-			return resolve();
+			return _get(channel, id)
+				.then((data) => {
+					let result = data;
+					result.channel = channel;
+					result.ended = dateUtil.utc();
+					return triviaDb.update(channel, result);
+				})
+				.then((data) => {
+					console.log("after update");
+					console.log(data);
+					return resolve(data);
+				})
+				.catch((err) => {
+					console.error(err);
+					return reject(err);
+				});
 		});
 	}
 };

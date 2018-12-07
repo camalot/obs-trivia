@@ -85,6 +85,10 @@ class ChatTriviaStartHandler {
 					this._currentQuestion = data;
 					console.log(this._currentQuestion);
 					return resolve(this._currentQuestion);
+				})
+				.catch(err => {
+					console.error(err);
+					return reject(err);
 				});
 		});
 	}
