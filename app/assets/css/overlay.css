@@ -99,7 +99,7 @@ body {
 
 }
 
-.no-answer .answer,
+.no-answer .message,
 .correct .message {
 	text-align: center;
 	font-size: 3.3em;

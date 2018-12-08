@@ -7,6 +7,8 @@ dist/
 data/
 .env
 
+.azure
+
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json

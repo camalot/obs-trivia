@@ -7,8 +7,8 @@ let result = {
 		PORT: parseInt(process.env.CT_MONGODB_PORT || "27017", 0),
 		ROOT_USERNAME: process.env.CT_MONGODB_ROOT_USERNAME || "mdbroot",
 		ROOT_PASSWORD: process.env.CT_MONGODB_ROOT_PASSWORD || "mdbroot",
-		DB_USERNAME: process.env.CT_MONGODB_DB_USERNAME || "obs-trivia",
-		DB_PASSWORD: process.env.CT_MONGODB_DB_PASSWORD || "obs-trivia",
+		AUTHDB: process.env.CT_MONGODB_AUTHDB || "admin",
+		CONNECT_ARGS: process.env.CT_MONGODB_ARGS || "",
 		DATABASE: process.env.CT_MONGODB_DATABASE || "obs-trivia"
 	}
 };
@@ -29,13 +29,13 @@ if (!result.mongodb.ROOT_PASSWORD || result.mongodb.ROOT_PASSWORD === "") {
 	throw new Error("CT_MONGODB_ROOT_PASSWORD not set.");
 }
 
-if (!result.mongodb.DB_USERNAME || result.mongodb.DB_USERNAME === "") {
-	throw new Error("CT_MONGODB_DB_USERNAME not set.");
-}
+// if (!result.mongodb.DB_USERNAME || result.mongodb.DB_USERNAME === "") {
+// 	throw new Error("CT_MONGODB_DB_USERNAME not set.");
+// }
 
-if (!result.mongodb.DB_PASSWORD || result.mongodb.DB_PASSWORD === "") {
-	throw new Error("CT_MONGODB_DB_PASSWORD not set.");
-}
+// if (!result.mongodb.DB_PASSWORD || result.mongodb.DB_PASSWORD === "") {
+// 	throw new Error("CT_MONGODB_DB_PASSWORD not set.");
+// }
 
 
 if (!result.mongodb.DATABASE || result.mongodb.DATABASE === "") {
