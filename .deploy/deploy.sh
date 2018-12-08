@@ -53,12 +53,12 @@ docker login --username "${ARTIFACTORY_USERNAME}" "${BUILD_PUSH_REGISTRY}" --pas
 docker push "${BUILD_PUSH_REGISTRY}/${tag_name_ver}";
 
 # Docker Push
-docker login --username "${DOCKER_HUB_USERNAME}" --password-stdin <<< "${DOCKER_HUB_PASSWORD}";
+# docker login --username "${DOCKER_HUB_USERNAME}" --password-stdin <<< "${DOCKER_HUB_PASSWORD}";
 
 # Only push "non-snapshots" to docker hub
-[[ ! $BUILD_VERSION =~ -snapshot$ ]] && \
-	docker push "${tag_name_latest}" && \
-	docker push "${tag_name_ver}";
+# [[ ! $BUILD_VERSION =~ -snapshot$ ]] && \
+# 	docker push "${tag_name_latest}" && \
+# 	docker push "${tag_name_ver}";
 
 unset BUILD_PROJECT;
 unset BUILD_PUSH_REGISTRY;

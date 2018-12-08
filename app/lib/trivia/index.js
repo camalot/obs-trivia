@@ -31,6 +31,12 @@ let _validateAnswer = (channel, id, username, guessIndex) => {
 	return new Promise((resolve, reject) => {
 		return _get(channel, id)
 			.then((data) => {
+
+				// no question, or already answered.
+				if(!data || data.correctGuess !== null) {
+					return resolve(null);
+				}
+
 				let result = data;
 				result.channel = channel;
 				let isCorrect = result.correctAnswer === guessIndex;

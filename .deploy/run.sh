@@ -41,7 +41,6 @@ PULL_REPOSITORY="${DOCKER_REGISTRY}";
 
 [[ -z "${CT_TWITCH_USERNAME// }" ]] && __error "Environment variable 'CT_TWITCH_USERNAME' missing or is empty";
 [[ -z "${CT_TWITCH_OAUTH// }" ]] && __error "Environment variable 'CT_TWITCH_OAUTH' missing or is empty";
-[[ -z "${CT_TWITCH_OAUTH_API// }" ]] && __error "Environment variable 'CT_TWITCH_OAUTH_API' missing or is empty";
 [[ -z "${CT_TWITCH_CLIENTID// }" ]] && __error "Environment variable 'CT_TWITCH_CLIENTID' missing or is empty";
 [[ -z "${CT_TWITCH_CLIENTSECRET// }" ]] && __error "Environment variable 'CT_TWITCH_CLIENTSECRET' missing or is empty";
 [[ -z "${CT_TWITCH_CHANNELS// }" ]] && __error "Environment variable 'CT_TWITCH_CHANNELS' missing or is empty";
