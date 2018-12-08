@@ -16,12 +16,12 @@ class MongoDatabase {
 		let _this = this;
 		return new Promise((resolve, reject) => {
 			if (_this.db) {
-				return resolve(_this.db);
+				return resolve(_this.mongodb);
 			} else {
 				return _this.mongodb
 					.connect()
 					.then(database => {
-						_this.db = database.db();
+						_this.db = database;
 						return resolve(database);
 					})
 					.catch(err => {
@@ -32,7 +32,7 @@ class MongoDatabase {
 		});
 	}
 
-	select(collection, query, options) {
+	select(collection, query, sort, options) {
 		var _this = this;
 		return new Promise((resolve, reject) => {
 			return _this.connect()
@@ -43,15 +43,13 @@ class MongoDatabase {
 					if (col) {
 						return col.find(query, options);
 					} else {
-						console.log("no collection");
 						return resolve(null);
 					}
 				})
 				.then(data => {
 					if(data) {
-						return resolve(data.toArray());
+						return resolve(data.sort(sort).toArray());
 					} else {
-						console.log("no data");
 						return resolve(null);
 					}
 				})
@@ -74,21 +72,16 @@ class MongoDatabase {
 					return client.db().collection(collection);
 				})
 				.then((col) => {
-					console.log("begin find");
 					return col.find(filter).sort(sort).limit(limit).toArray();
 				})
 				.then((result) => {
-					console.log("result: ");
 					if(result && result.length > 0) {
-						console.log(result);
 						return resolve(result);
 					} else {
-						console.log("NOTHING");
 						return resolve(null);
 					}
 				})
 				.then(() => {
-					console.log("close db");
 					return _this.close();
 				})
 				.catch((err) => {
@@ -133,13 +126,18 @@ class MongoDatabase {
 					return client.db().collection(collection);
 				})
 				.then((col) => {
-					console.log(update);
-					return col.updateOne(filter, { $set: update }, options || { upsert: true, returnOriginal: false });
+					return col.updateOne(filter, { $set: update }, options || { upsert: true, returnOriginal: true });
 				})
 				.then(data => {
-					console.log(data);
-					if(data.result) {
-						return resolve(data.result);
+					if(data.result.ok) {
+						return _this.find(collection, filter, null, 1);
+					} else {
+						return resolve(null);
+					}
+				})
+				.then((result) => {
+					if(result && result.length > 0) {
+						return resolve(result[0] || null);
 					} else {
 						return resolve(null);
 					}
@@ -168,7 +166,6 @@ class MongoDatabase {
 				.then((colinfo) => {
 					console.log(colinfo);
 					if (!colinfo || colinfo.length === 0) {
-						console.log("create collection");
 						return _client.db().createCollection(collection);
 					} else {
 						return _client.db().collection(collection);
@@ -176,24 +173,19 @@ class MongoDatabase {
 				})
 				.then((col) => {
 					_collection = col;
-					console.log(`find: ${object.id}:${object.channel}`);
 					return _collection.findOne({ id: object.id, channel: object.channel });
 				})
 				.then((result) => {
 					if (!result) {
-						console.log("insert new");
 						return _collection.insertOne(object);
 					} else {
-						console.log("find and update");
 						return _collection.findOneAndUpdate({ id: object.id }, object);
 					}
 				})
 				.then(() => {
-					console.log("close db");
 					return _this.close();
 				})
 				.then(() => {
-					console.log("return object");
 					return resolve(object);
 				})
 				.catch(err => {

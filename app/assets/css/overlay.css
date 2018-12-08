@@ -99,6 +99,7 @@ body {
 
 }
 
+.no-answer .answer,
 .correct .message {
 	text-align: center;
 	font-size: 3.3em;
@@ -111,6 +112,7 @@ body {
 
 .no-answer .answer,
 .correct .answer {
+	margin-top: 5px;
 	text-align: center;
 	font-weight: bold;
 	font-size: 3em;

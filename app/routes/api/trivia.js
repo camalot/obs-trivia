@@ -2,7 +2,8 @@
 const express = require('express');
 const router = express.Router();
 const trivia = require('../../lib/trivia');
-
+const utils = require('../../lib/utils');
+const stringUtils = utils.string;
 
 router.get('/all/:channel', (req, res, next) => {
 	return trivia.all(req.params.channel)
@@ -38,9 +39,19 @@ router.get('/latest/:channel', (req, res, next) => {
 router.get('/:channel/:id?', (req, res, next) => {
 	return trivia.get(req.params.channel, req.params.id || null)
 		.then((data) => {
-			console.log("data:");
-			console.log(data);
+			// console.log("data:");
+			// console.log(data);
 			return res.json(data);
+		})
+		.catch((err) => {
+			return next(err);
+		});
+});
+
+router.delete('/truncate/:channel/', (req, res, next) => {
+	return trivia.truncate(req.params.channel)
+		.then(() => {
+			return res.json({});
 		})
 		.catch((err) => {
 			return next(err);

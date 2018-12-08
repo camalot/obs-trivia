@@ -2,7 +2,17 @@
 const https = require('https');
 const shortid = require('shortid');
 const triviaDb = require('../database/trivia');
-const dateUtil = require('../utils').date;
+const utils = require('../utils');
+const dateUtil = utils.date;
+const stringUtil = utils.string;
+const pointsDb = require('../database/points');
+
+let DIFFICULTY = {
+	"none": 0,
+	"easy": 100,
+	"medium": 300,
+	"hard": 500
+};
 
 let getAnswers = (data) => {
 	let answers = data.incorrect_answers;
@@ -16,7 +26,59 @@ let getAnswers = (data) => {
 	};
 };
 
+let _validateAnswer = (channel, id, username, guessIndex) => {
+	channel = stringUtil.safeChannel(channel);
+	return new Promise((resolve, reject) => {
+		return _get(channel, id)
+			.then((data) => {
+				let result = data;
+				result.channel = channel;
+				let isCorrect = result.correctAnswer === guessIndex;
+				if (isCorrect) {
+					// only set `ended` if correct
+					result.ended = dateUtil.utc();
+					result.correctGuess = username;
+				} else {
+					if (result.incorrectGuesses.indexOf(username) < 0) {
+						result.incorrectGuesses.push(username);
+					}
+				}
+				return triviaDb.update(channel, result);
+			})
+			.then((result) => {
+				if (result) {
+					let isCorrect = result.correctAnswer === guessIndex;
+					if (isCorrect) {
+						return pointsDb.insert(channel, {
+							username: username,
+							channel: stringUtil.safeChannel(channel),
+							points: DIFFICULTY[result.difficulty || "none"],
+							created: dateUtil.utc(),
+							question: result.id
+						}).then(() => {
+							return resolve(true);
+						})
+							.catch(err => {
+								console.error(err);
+								return reject(err);
+							});
+					} else {
+						// incorrect, just resolve
+						return resolve(false);
+					}
+				} else {
+					// no result, just resolve
+					return resolve(false);
+				}
+			}).catch((err) => {
+				console.error(err);
+				return reject(err);
+			});
+	});
+};
+
 let _new = (channel) => {
+	channel = stringUtil.safeChannel(channel);
 	return new Promise((resolve, reject) => {
 		const request = https.get(`https://opentdb.com/api.php?amount=1`, (response) => {
 			if (response.statusCode < 200 || response.statusCode > 299) {
@@ -45,15 +107,11 @@ let _new = (channel) => {
 						created: dateUtil.utc(),
 						ended: null
 					};
-					console.log("begin insert");
 					return triviaDb.insert(channel, result)
 						.then((r) => {
-							console.log("after insert of new question");
-							console.log(r);
 							return resolve(r);
 						});
 				} else {
-					console.log("return null");
 					return resolve(null);
 				}
 			});
@@ -63,21 +121,25 @@ let _new = (channel) => {
 };
 
 let _get = (channel, id) => {
+	channel = stringUtil.safeChannel(channel);
 	return new Promise((resolve, reject) => {
 		if (!id) {
-			console.log("get latest");
+			console.log(`no id, get latest: channel: ${channel}`);
 			return _getLatest(channel)
 				.then(r => {
+					console.log("return latest item");
+					console.log(r);
 					return resolve(r);
 				})
 				.catch(err => {
+					console.error(err);
 					return reject(err);
 				});
 		} else {
 			console.log(`get: ${id}:${channel}`);
 			return triviaDb.get(channel, id)
 				.then((result) => {
-					console.log("return object");
+					console.log("return item by id");
 					return resolve(result);
 				})
 				.catch((err) => {
@@ -89,79 +151,53 @@ let _get = (channel, id) => {
 };
 
 let _getLatest = (channel) => {
+	channel = stringUtil.safeChannel(channel);
 	return new Promise((resolve, reject) => {
 		return triviaDb.find(channel, { ended: null }, { created: -1 }, 1)
 			.then((data) => {
-				if(!data && data.length > 0) {
+				if (!data || data.length === 0) {
+					console.log("latest: no result");
 					return resolve(null);
 				} else {
+					console.log("latest: return item");
 					return resolve(data[0]);
 				}
 			})
 			.catch((err) => {
+				console.error(err);
 				return reject(err);
 			});
 	});
 };
 
-let _currentQuestion = null;
+let _clear = (channel, id) => {
+	channel = stringUtil.safeChannel(channel);
+	return new Promise((resolve, reject) => {
+		return _get(channel, id)
+			.then((data) => {
+				let result = data;
+				result.channel = channel;
+				result.ended = dateUtil.utc();
+				return triviaDb.update(channel, result);
+			})
+			.then((data) => {
+				return resolve(data);
+			})
+			.catch((err) => {
+				console.error(err);
+				return reject(err);
+			});
+	});
+};
 
 // https://opentdb.com/api.php?amount=1
 module.exports = {
-	activeQuestion: _currentQuestion,
 	create: _new,
 	get: _get,
 	latest: _getLatest,
-	all: (channel) => triviaDb.all(channel),
-	answer: (channel, id, username, guessIndex) => {
-		return new Promise((resolve, reject) => {
-			return _get(channel, id)
-				.then((data) => {
-					let result = data;
-					result.channel = channel;
-					let isCorrect = result.correctAnswer === guessIndex;
-					result.ended = dateUtil.utc();
-					if (isCorrect) {
-						result.correctGuess = username;
-					} else {
-						if (result.incorrectGuesses.indexOf(username) < 0) {
-							result.incorrectGuesses.push(username);
-						}
-					}
-					return triviaDb.update(channel, result);
-				})
-				.then((result) => {
-					if (result) {
-						let isCorrect = result.correctAnswer === guessIndex;
-						return resolve(isCorrect);
-					} else {
-						return resolve(false);
-					}
-				}).catch((err) => {
-					return reject(err);
-				});
-		});
-	},
-	delete: (channel, id) => triviaDb.delete(channel, id),
-	truncate: (channel) => triviaDb.truncate(channel || "_DUMMY_"),
-	clear: (channel, id) => {
-		return new Promise((resolve, reject) => {
-			return _get(channel, id)
-				.then((data) => {
-					let result = data;
-					result.channel = channel;
-					result.ended = dateUtil.utc();
-					return triviaDb.update(channel, result);
-				})
-				.then((data) => {
-					console.log("after update");
-					console.log(data);
-					return resolve(data);
-				})
-				.catch((err) => {
-					console.error(err);
-					return reject(err);
-				});
-		});
-	}
+	all: (channel) => triviaDb.all(stringUtil.safeChannel(channel)),
+	answer: _validateAnswer,
+	delete: (channel, id) => triviaDb.delete(stringUtil.safeChannel(channel), id),
+	truncate: (channel) => triviaDb.truncate(stringUtil.safeChannel(channel || "_DUMMY_")),
+	clear: _clear
 };
