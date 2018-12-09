@@ -9,7 +9,6 @@ class MongoDatabase {
 		this.db = null;
 		this.dbName = dbname;
 		this.uri = `mongodb://${dbconfig.USERNAME}:${dbconfig.PASSWORD}@${dbconfig.HOST}:${dbconfig.PORT}/${dbname}${dbconfig.CONNECT_ARGS}`;
-		console.log(this.uri);
 		this.mongodb = new MongoClient(this.uri, { useNewUrlParser: true, authSource: dbconfig.AUTHDB });
 	}
 
@@ -55,6 +54,7 @@ class MongoDatabase {
 					}
 				})
 				.then(() => {
+					console.log("close db");
 					return _this.close();
 				})
 				.catch(err => {

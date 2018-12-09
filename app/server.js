@@ -30,14 +30,21 @@ require("./routes")(app);
 let chat = require('./lib/twitch/chat');
 chat.initialize()
 	.then((c) => {
-		return chat.register();
+		if(c) {
+			console.log("register");
+			return chat.register();
+		} else {
+			return new Promise((resolve, reject) => {
+				return resolve();
+			});
+		}
 	})
 	.then(() => {
 		return triviaDb.init();
 	})
 	.catch(err => {
 		console.error(err);
-		throw err;
+		return;
 	});
 // 404 error handler
 app.use(

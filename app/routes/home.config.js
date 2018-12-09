@@ -4,8 +4,8 @@ const xconfig = require("../config");
 const merge = require("merge");
 
 let config = {
-	overlay: {
-		route: "/overlay"
+	home: {
+		route: "/"
 	}
 };
 
