@@ -45,14 +45,12 @@ PULL_REPOSITORY="${DOCKER_REGISTRY}";
 [[ -z "${CT_TWITCH_CLIENTSECRET// }" ]] && __error "Environment variable 'CT_TWITCH_CLIENTSECRET' missing or is empty";
 [[ -z "${CT_TWITCH_CHANNELS// }" ]] && __error "Environment variable 'CT_TWITCH_CHANNELS' missing or is empty";
 [[ -z "${CT_MONGODB_DATABASE// }" ]] && __error "Environment variable 'CT_MONGODB_DATABASE' missing or is empty";
-# [[ -z "${CT_MONGODB_DB_PASSWORD// }" ]] && __error "Environment variable 'CT_MONGODB_DB_PASSWORD' missing or is empty";
-# [[ -z "${CT_MONGODB_DB_USERNAME// }" ]] && __error "Environment variable 'CT_MONGODB_DB_USERNAME' missing or is empty";
 [[ -z "${CT_MONGODB_HOST// }" ]] && __error "Environment variable 'CT_MONGODB_HOST' missing or is empty";
 [[ -z "${CT_MONGODB_ARGS// }" ]] && __error "Environment variable 'CT_MONGODB_ARGS' missing or is empty";
 [[ -z "${CT_MONGODB_AUTHDB// }" ]] && __error "Environment variable 'CT_MONGODB_AUTHDB' missing or is empty";
 [[ -z "${CT_MONGODB_PORT// }" ]] && __error "Environment variable 'CT_MONGODB_PORT' missing or is empty";
-[[ -z "${CT_MONGODB_ROOT_PASSWORD// }" ]] && __error "Environment variable 'CT_MONGODB_ROOT_PASSWORD' missing or is empty";
-[[ -z "${CT_MONGODB_ROOT_USERNAME// }" ]] && __error "Environment variable 'CT_MONGODB_ROOT_USERNAME' missing or is empty";
+[[ -z "${CT_MONGODB_PASSWORD// }" ]] && __error "Environment variable 'CT_MONGODB_PASSWORD' missing or is empty";
+[[ -z "${CT_MONGODB_USERNAME// }" ]] && __error "Environment variable 'CT_MONGODB_USERNAME' missing or is empty";
 
 DOCKER_IMAGE="${BUILD_ORG}/${BUILD_PROJECT}:${BUILD_VERSION}";
 
@@ -99,8 +97,8 @@ docker run -d \
 	-e CT_MONGODB_ARGS="${CT_MONGODB_ARGS}" \
 	-e CT_MONGODB_AUTHDB="${CT_MONGODB_AUTHDB}" \
 	-e CT_MONGODB_PORT="${CT_MONGODB_PORT}" \
-	-e CT_MONGODB_ROOT_PASSWORD="${CT_MONGODB_ROOT_PASSWORD}" \
-	-e CT_MONGODB_ROOT_USERNAME="${CT_MONGODB_ROOT_USERNAME}" \
+	-e CT_MONGODB_PASSWORD="${CT_MONGODB_PASSWORD}" \
+	-e CT_MONGODB_USERNAME="${CT_MONGODB_USERNAME}" \
 	-p "49180:3000" \
 	-t "${DOCKER_IMAGE}";
 

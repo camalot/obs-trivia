@@ -51,8 +51,8 @@ node ("node") {
 							env.CT_MONGODB_PORT = SecretsVault.get(this, "secret/${env.CI_PROJECT_NAME}", "CT_MONGODB_PORT")
 							env.CT_MONGODB_ARGS = SecretsVault.get(this, "secret/${env.CI_PROJECT_NAME}", "CT_MONGODB_ARGS")
 							env.CT_MONGODB_AUTHDB = SecretsVault.get(this, "secret/${env.CI_PROJECT_NAME}", "CT_MONGODB_AUTHDB")
-							env.CT_MONGODB_ROOT_PASSWORD = SecretsVault.get(this, "secret/${env.CI_PROJECT_NAME}", "CT_MONGODB_ROOT_PASSWORD")
-							env.CT_MONGODB_ROOT_USERNAME = SecretsVault.get(this, "secret/${env.CI_PROJECT_NAME}", "CT_MONGODB_ROOT_USERNAME")
+							env.CT_MONGODB_PASSWORD = SecretsVault.get(this, "secret/${env.CI_PROJECT_NAME}", "CT_MONGODB_PASSWORD")
+							env.CT_MONGODB_USERNAME = SecretsVault.get(this, "secret/${env.CI_PROJECT_NAME}", "CT_MONGODB_USERNAME")
 
 							deleteDir()
 							Branch.checkout(this, env.CI_PROJECT_NAME)
