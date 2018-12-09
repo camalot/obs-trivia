@@ -46,40 +46,43 @@ node ("docker") {
 	wrap([$class: 'TimestamperBuildWrapper']) {
 		wrap([$class: 'AnsiColorBuildWrapper', colorMapName: 'xterm']) {
 			Notify.slack(this, "STARTED", null, slack_notify_channel)
-			withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: env.CI_ARTIFACTORY_CREDENTIAL_ID,
-					usernameVariable: 'ARTIFACTORY_USERNAME', passwordVariable: 'ARTIFACTORY_PASSWORD']]) {
-				try {
-					stage ("install") {
-							env.CT_TWITCH_USERNAME = SecretsVault.get(this, "secret/${env.CI_PROJECT_NAME}", "CT_TWITCH_USERNAME")
-							env.CT_TWITCH_OAUTH = SecretsVault.get(this, "secret/${env.CI_PROJECT_NAME}", "CT_TWITCH_OAUTH")
-							env.CT_TWITCH_OAUTH_API = SecretsVault.get(this, "secret/${env.CI_PROJECT_NAME}", "CT_TWITCH_OAUTH_API")
-							env.CT_TWITCH_CLIENTID = SecretsVault.get(this, "secret/${env.CI_PROJECT_NAME}", "CT_TWITCH_CLIENTID")
-							env.CT_TWITCH_CLIENTSECRET = SecretsVault.get(this, "secret/${env.CI_PROJECT_NAME}", "CT_TWITCH_CLIENTSECRET")
-							env.CT_TWITCH_CHANNELS = SecretsVault.get(this, "secret/${env.CI_PROJECT_NAME}", "CT_TWITCH_CHANNELS")
-							env.CT_MONGODB_DATABASE = SecretsVault.get(this, "secret/${env.CI_PROJECT_NAME}", "CT_MONGODB_DATABASE")
-							env.CT_MONGODB_HOST = SecretsVault.get(this, "secret/${env.CI_PROJECT_NAME}", "CT_MONGODB_HOST")
-							env.CT_MONGODB_PORT = SecretsVault.get(this, "secret/${env.CI_PROJECT_NAME}", "CT_MONGODB_PORT")
-							env.CT_MONGODB_ARGS = SecretsVault.get(this, "secret/${env.CI_PROJECT_NAME}", "CT_MONGODB_ARGS")
-							env.CT_MONGODB_AUTHDB = SecretsVault.get(this, "secret/${env.CI_PROJECT_NAME}", "CT_MONGODB_AUTHDB")
-							env.CT_MONGODB_ROOT_PASSWORD = SecretsVault.get(this, "secret/${env.CI_PROJECT_NAME}", "CT_MONGODB_ROOT_PASSWORD")
-							env.CT_MONGODB_ROOT_USERNAME = SecretsVault.get(this, "secret/${env.CI_PROJECT_NAME}", "CT_MONGODB_ROOT_USERNAME")
+			withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: env.CI_AZURE_CREDENTIAL_ID,
+					usernameVariable: 'AZURE_USERNAME', passwordVariable: 'AZURE_PASSWORD']]) {
+				withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: env.CI_ARTIFACTORY_CREDENTIAL_ID,
+						usernameVariable: 'ARTIFACTORY_USERNAME', passwordVariable: 'ARTIFACTORY_PASSWORD']]) {
+					try {
+						stage ("install") {
+								env.CT_TWITCH_USERNAME = SecretsVault.get(this, "secret/${env.CI_PROJECT_NAME}", "CT_TWITCH_USERNAME")
+								env.CT_TWITCH_OAUTH = SecretsVault.get(this, "secret/${env.CI_PROJECT_NAME}", "CT_TWITCH_OAUTH")
+								env.CT_TWITCH_OAUTH_API = SecretsVault.get(this, "secret/${env.CI_PROJECT_NAME}", "CT_TWITCH_OAUTH_API")
+								env.CT_TWITCH_CLIENTID = SecretsVault.get(this, "secret/${env.CI_PROJECT_NAME}", "CT_TWITCH_CLIENTID")
+								env.CT_TWITCH_CLIENTSECRET = SecretsVault.get(this, "secret/${env.CI_PROJECT_NAME}", "CT_TWITCH_CLIENTSECRET")
+								env.CT_TWITCH_CHANNELS = SecretsVault.get(this, "secret/${env.CI_PROJECT_NAME}", "CT_TWITCH_CHANNELS")
+								env.CT_MONGODB_DATABASE = SecretsVault.get(this, "secret/${env.CI_PROJECT_NAME}", "CT_MONGODB_DATABASE")
+								env.CT_MONGODB_HOST = SecretsVault.get(this, "secret/${env.CI_PROJECT_NAME}", "CT_MONGODB_HOST")
+								env.CT_MONGODB_PORT = SecretsVault.get(this, "secret/${env.CI_PROJECT_NAME}", "CT_MONGODB_PORT")
+								env.CT_MONGODB_ARGS = SecretsVault.get(this, "secret/${env.CI_PROJECT_NAME}", "CT_MONGODB_ARGS")
+								env.CT_MONGODB_AUTHDB = SecretsVault.get(this, "secret/${env.CI_PROJECT_NAME}", "CT_MONGODB_AUTHDB")
+								env.CT_MONGODB_ROOT_PASSWORD = SecretsVault.get(this, "secret/${env.CI_PROJECT_NAME}", "CT_MONGODB_ROOT_PASSWORD")
+								env.CT_MONGODB_ROOT_USERNAME = SecretsVault.get(this, "secret/${env.CI_PROJECT_NAME}", "CT_MONGODB_ROOT_USERNAME")
 
-						Branch.checkout(this, env.CI_PROJECT_NAME)
-						Pipeline.install(this)
+							Branch.checkout(this, env.CI_PROJECT_NAME)
+							Pipeline.install(this)
+						}
+						stage ("test") {
+							sh script:  "${WORKSPACE}/.deploy/validate.sh -n '${env.CI_PROJECT_NAME}' -v '${env.CI_BUILD_VERSION}' -o '${env.CI_DOCKER_ORGANIZATION}'"
+						}
+						stage ("deploy") {
+							sh script:  "${WORKSPACE}/.deploy/run.sh -n '${env.CI_PROJECT_NAME}' -v '${env.CI_BUILD_VERSION}' -o '${env.CI_DOCKER_ORGANIZATION}' -f"
+						}
+					} catch(err) {
+						currentBuild.result = "FAILURE"
+						errorMessage = err.message
+						throw err
 					}
-					stage ("test") {
-						sh script:  "${WORKSPACE}/.deploy/validate.sh -n '${env.CI_PROJECT_NAME}' -v '${env.CI_BUILD_VERSION}' -o '${env.CI_DOCKER_ORGANIZATION}'"
+					finally {
+						Pipeline.finish(this, currentBuild.result, errorMessage)
 					}
-					stage ("deploy") {
-						sh script:  "${WORKSPACE}/.deploy/run.sh -n '${env.CI_PROJECT_NAME}' -v '${env.CI_BUILD_VERSION}' -o '${env.CI_DOCKER_ORGANIZATION}' -f"
-					}
-				} catch(err) {
-					currentBuild.result = "FAILURE"
-					errorMessage = err.message
-					throw err
-				}
-				finally {
-					Pipeline.finish(this, currentBuild.result, errorMessage)
 				}
 			}
 		}

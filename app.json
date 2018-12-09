@@ -1,0 +1,80 @@
+{
+	"name": "obs-trivia",
+	"description": "A Twitch Chat Bot + OBS Overlay for Trivia",
+	"keywords": [
+		"obs",
+		"trivia",
+		"twitch",
+		"fun"
+	],
+	"repository": "https://github.com/camalot/obs-trivia.git",
+	"website": "https://github.com/camalot/obs-trivia",
+	"env": {
+		"CT_TWITCH_USERNAME": {
+			"description": "Twitch Bot Username",
+			"value": "",
+			"required": true
+		},
+		"CT_TWITCH_OAUTH": {
+			"description": "Twitch Bot Account OAUTH Key",
+			"value": "",
+			"required": true
+		},
+		"CT_TWITCH_CLIENTID": {
+			"description": "Twitch App Client ID",
+			"value": "",
+			"required": true
+		},
+		"CT_TWITCH_CLIENTSECRET": {
+			"description": "Twitch App Client Secret",
+			"value": "",
+			"required": true
+		},
+		"CT_TWITCH_CHANNELS": {
+			"description": "Twitch Channels For the Bot to Join",
+			"value": "",
+			"required": true
+		},
+		"CT_MONGODB_HOST": {
+			"description": "Mongodb Database Hostname",
+			"value": "",
+			"required": true
+		},
+		"CT_MONGODB_PORT": {
+			"description": "Mongodb database port",
+			"value": "27017",
+			"required": true
+		},
+		"CT_MONGODB_ARGS": {
+			"description": "Mongodb database connection args",
+			"value": "?ssl=true",
+			"required": true
+		},
+		"CT_MONGODB_AUTHDB": {
+			"description": "Mongodb database auth database",
+			"value": "admin",
+			"required": true
+		},
+		"CT_MONGODB_PASSWORD": {
+			"description": "Mongodb database connection password",
+			"value": "",
+			"required": true
+		},
+		"CT_MONGODB_USERNAME": {
+			"description": "Mongodb database connection username",
+			"value": "obs-trivia",
+			"required": true
+		},
+		"CT_MONGODB_DATABASE": {
+			"description": "Mongodb database name",
+			"value": "obs-trivia",
+			"required": true
+		}
+	},
+	"image": "heroku/nodejs",
+	"buildpacks": [
+		{
+			"url": "heroku/nodejs"
+		}
+	]
+}

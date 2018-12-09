@@ -1,7 +1,7 @@
 FROM node:9-alpine
 
 # set version label
-ARG PROJECT_NAME="obs-trivai"
+ARG PROJECT_NAME="obs-trivia"
 ARG BUILD_VERSION="1.0.0-snapshot"
 
 ARG PUID=3000
@@ -25,14 +25,14 @@ RUN \
 	&& apk add nodejs \
 	&& apk add bash \
 	&& rm -rf /var/cache/apk/* \
-	&& mkdir -p /trivia
+	&& mkdir -p /app
 
 
-COPY . /trivia
-WORKDIR /trivia
+COPY . /app
+WORKDIR /app
 
 RUN \
-	chown -R "${VUSER}:${VGROUP}" /trivia
+	chown -R "${VUSER}:${VGROUP}" /app
 
 USER ${VUSER}
 

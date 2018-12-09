@@ -8,7 +8,7 @@ class MongoDatabase {
 	constructor(dbname) {
 		this.db = null;
 		this.dbName = dbname;
-		this.uri = `mongodb://${dbconfig.ROOT_USERNAME}:${dbconfig.ROOT_PASSWORD}@${dbconfig.HOST}:${dbconfig.PORT}/${dbname}${dbconfig.CONNECT_ARGS}`;
+		this.uri = `mongodb://${dbconfig.USERNAME}:${dbconfig.PASSWORD}@${dbconfig.HOST}:${dbconfig.PORT}/${dbname}${dbconfig.CONNECT_ARGS}`;
 		console.log(this.uri);
 		this.mongodb = new MongoClient(this.uri, { useNewUrlParser: true, authSource: dbconfig.AUTHDB });
 	}
