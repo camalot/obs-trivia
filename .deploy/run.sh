@@ -45,8 +45,8 @@ PULL_REPOSITORY="${DOCKER_REGISTRY}";
 [[ -z "${CT_TWITCH_CLIENTSECRET// }" ]] && __error "Environment variable 'CT_TWITCH_CLIENTSECRET' missing or is empty";
 [[ -z "${CT_TWITCH_CHANNELS// }" ]] && __error "Environment variable 'CT_TWITCH_CHANNELS' missing or is empty";
 [[ -z "${CT_MONGODB_DATABASE// }" ]] && __error "Environment variable 'CT_MONGODB_DATABASE' missing or is empty";
-[[ -z "${CT_MONGODB_DB_PASSWORD// }" ]] && __error "Environment variable 'CT_MONGODB_DB_PASSWORD' missing or is empty";
-[[ -z "${CT_MONGODB_DB_USERNAME// }" ]] && __error "Environment variable 'CT_MONGODB_DB_USERNAME' missing or is empty";
+# [[ -z "${CT_MONGODB_DB_PASSWORD// }" ]] && __error "Environment variable 'CT_MONGODB_DB_PASSWORD' missing or is empty";
+# [[ -z "${CT_MONGODB_DB_USERNAME// }" ]] && __error "Environment variable 'CT_MONGODB_DB_USERNAME' missing or is empty";
 [[ -z "${CT_MONGODB_HOST// }" ]] && __error "Environment variable 'CT_MONGODB_HOST' missing or is empty";
 [[ -z "${CT_MONGODB_ARGS// }" ]] && __error "Environment variable 'CT_MONGODB_ARGS' missing or is empty";
 [[ -z "${CT_MONGODB_AUTHDB// }" ]] && __error "Environment variable 'CT_MONGODB_AUTHDB' missing or is empty";
@@ -95,8 +95,6 @@ docker run -d \
 	-e CT_TWITCH_CLIENTSECRET="${CT_TWITCH_CLIENTSECRET}" \
 	-e CT_TWITCH_CHANNELS="${CT_TWITCH_CHANNELS}" \
 	-e CT_MONGODB_DATABASE="${CT_MONGODB_DATABASE}" \
-	-e CT_MONGODB_DB_PASSWORD="${CT_MONGODB_DB_PASSWORD}" \
-	-e CT_MONGODB_DB_USERNAME="${CT_MONGODB_DB_USERNAME}" \
 	-e CT_MONGODB_HOST="${CT_MONGODB_HOST}" \
 	-e CT_MONGODB_ARGS="${CT_MONGODB_ARGS}" \
 	-e CT_MONGODB_AUTHDB="${CT_MONGODB_AUTHDB}" \
@@ -105,3 +103,6 @@ docker run -d \
 	-e CT_MONGODB_ROOT_USERNAME="${CT_MONGODB_ROOT_USERNAME}" \
 	-p "49180:3000" \
 	-t "${DOCKER_IMAGE}";
+
+	# -e CT_MONGODB_DB_PASSWORD="${CT_MONGODB_DB_PASSWORD}" \
+	# -e CT_MONGODB_DB_USERNAME="${CT_MONGODB_DB_USERNAME}" \
