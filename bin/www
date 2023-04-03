@@ -4,17 +4,18 @@
 const path = require('path');
 const fs = require("fs");
 const envFile = path.join(__dirname, "../.env");
+
 try {
 	fs.accessSync(envFile, fs.F_OK);
 	console.log("loading .env file");
-	require('dotenv').config({path: envFile});
+	require('dotenv').config({ path: envFile });
 } catch (e) {
 	// no env file
 }
 
 const app = require('../app/server');
+
 const debug = require('debug')('obs-trivia-chat:server');
-const http = require('http');
 let port;
 let server;
 
@@ -71,8 +72,7 @@ function onListening() {
  * Get this party started :)
  */
 port = normalizePort(process.env.PORT || '3000');
-app.set('port', port);
-server = http.createServer(app);
+server = app.server;
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);

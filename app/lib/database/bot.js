@@ -15,15 +15,7 @@ let _all = () => {
 		let mongodb = new MongoDatabase(DATABASE_NAME);
 		return mongodb.select(COLLECTION_NAME)
 			.then(data => {
-				return async.map(data, (item, next) => {
-					return next(null, item.id);
-				}, (err, results) => {
-					if(err) {
-						console.error(err);
-						return reject(err);
-					}
-					return resolve(results);
-				});
+				return resolve(data);
 			})
 			.catch(err => {
 				console.error(err);
@@ -33,10 +25,46 @@ let _all = () => {
 
 };
 
+let _allChannels = () => {
+	return new Promise((resolve, reject) => {
+		return _all()
+			.then((data) => {
+				return async.map(data, (item, next) => {
+					return next(null, item.id);
+				}, (err, results) => {
+					if (err) {
+						console.error(err);
+						return reject(err);
+					}
+					return resolve(results);
+				});
+			})
+			.catch(err => {
+				return reject(err);
+			});
+	});
+};
+
 let _get = (channel) => {
 	channel = stringUtils.safeChannel(channel);
 	let mongodb = new MongoDatabase(DATABASE_NAME);
 	return mongodb.get(COLLECTION_NAME, { id: channel });
+};
+
+let _update = (channel, update) => {
+	let mongodb = new MongoDatabase(DATABASE_NAME);
+	return new Promise((resolve, reject) => {
+		let o = merge(update, {});
+		delete o._id;
+		return mongodb.updateOne(COLLECTION_NAME, { id: channel }, o)
+			.then((result) => {
+				return resolve(result);
+			})
+			.catch(err => {
+				console.error(err);
+				return reject(err);
+			});
+	});
 };
 
 let _join = (channel) => {
@@ -48,7 +76,7 @@ let _join = (channel) => {
 					return resolve(data);
 				} else {
 					let mongodb = new MongoDatabase(DATABASE_NAME);
-					return mongodb.insert(COLLECTION_NAME, { id: channel })
+					return mongodb.insert(COLLECTION_NAME, { id: channel, enabled: true })
 						.then((d) => resolve(d))
 						.catch(err => reject(err));
 				}
@@ -79,7 +107,7 @@ let _part = (channel) => {
 				return reject(err);
 			});
 	});
-}
+};
 
 
 module.exports = {
@@ -89,7 +117,9 @@ module.exports = {
 		});
 	},
 	all: _all,
+	channels: _allChannels,
 	get: _get,
+	update: _update,
 	join: _join,
 	part: _part
 };

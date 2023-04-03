@@ -6,6 +6,16 @@ const utils = require('../../lib/utils');
 const stringUtils = utils.string;
 
 router.get('/', (req, res, next) => {
+	return bot.channels()
+		.then((data) => {
+			return res.json(data);
+		})
+		.catch(err => {
+			return next(err);
+		});
+});
+
+router.get('/all', (req, res, next) => {
 	return bot.all()
 		.then((data) => {
 			return res.json(data);
@@ -13,6 +23,22 @@ router.get('/', (req, res, next) => {
 		.catch(err => {
 			return next(err);
 		});
+});
+
+router.post("/:channel", (req, res, next) => {
+
+	let obj = req.body;
+	if(!obj.id && !obj.enabled) {
+		return next(new Error('Invalid Update Object Specified'));
+	} else {
+		return bot.update(req.params.channel, obj)
+			.then((d) => {
+				return res.json(d);
+			})
+			.catch(err => {
+				return next(err);
+			});
+	}
 });
 
 router.put('/:channel', (req, res, next) => {

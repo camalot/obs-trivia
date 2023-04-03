@@ -1,5 +1,6 @@
 "use strict";
 const pointsDb = require('../database/points');
+const botDb = require('../database/bot');
 const async = require('async');
 const utils = require('../utils');
 const stringUtils = utils.string;
@@ -14,48 +15,76 @@ class ChatTriviaHandler {
 	// 12/2/2018 @bobdadestr0yer2 donated $10: I hate you darth
 
 	constructor(chatHandler) {
-		//super();
+		let _this = this;
 		this._chat = chatHandler;
 		console.log("chat start handler");
 		this._chat.on('chat', (channel, userstate, message, self) => {
 			if (self || message === "" || message === null || message === undefined) {
 				return;
 			}
-			console.log("message: " + message);
 
-			if (TRIVIA_COMMAND_REGEX.test(message)) {
-				let match = TRIVIA_COMMAND_REGEX.exec(message);
-				console.log(message);
-				if(match[1]) {
-					console.log(`match: ${match[1]}`);
-					switch(match[1].toLowerCase()) {
-						case "top":
-							let tmatch = TOP_COMMAND_REGEX.exec(message);
-							let count = 5;
-							if (tmatch && tmatch[1]) {
-								count = parseInt(tmatch[1], 0);
-							}
-							return this.getTopPoints(channel, count);
-						case "points":
-							console.log(`${channel}:${userstate.username}: get points`);
-							return this.getUserPoints(channel, userstate.username);
-
-						default:
-							return this.help(channel, userstate.username);
+			botDb.get(channel)
+				.then((data) => {
+					return new Promise((resolve, reject) => {
+						if (!data || !data.enabled) {
+							return resolve(null);
+						} else {
+							return resolve(data);
+						}
+					});
+				}).then((channelData) => {
+					console.log(channelData);
+					if(channelData) {
+						return _this._processChat(channel, userstate, message, self);
+					} else {
+						return new Promise((resolve, reject) => resolve());
 					}
-				} else {
-					console.log("trivia start command");
-					return this.startTrivia(channel, userstate);
-				}
-			}
+				})
+				.catch((err) => {
+					console.error(err);
+					return reject(err);
+				});
 
-			if (ANSWER_COMMAND_REGEX.test(message)) {
-				console.log(`${channel}:${userstate.username} answered: ${message}`)
-				return this.checkAnswer(channel, userstate, message);
-			}
-
-			console.log(`exit no matches: ${channel}:${userstate.username} => ${message}`);
 		});
+	}
+
+	_processChat(channel, userstate, message, self) {
+
+
+		console.log("message: " + message);
+
+		if (TRIVIA_COMMAND_REGEX.test(message)) {
+			let match = TRIVIA_COMMAND_REGEX.exec(message);
+			console.log(message);
+			if (match[1]) {
+				console.log(`match: ${match[1]}`);
+				switch (match[1].toLowerCase()) {
+					case "top":
+						let tmatch = TOP_COMMAND_REGEX.exec(message);
+						let count = 5;
+						if (tmatch && tmatch[1]) {
+							count = parseInt(tmatch[1], 0);
+						}
+						return this.getTopPoints(channel, count);
+					case "points":
+						console.log(`${channel}:${userstate.username}: get points`);
+						return this.getUserPoints(channel, userstate.username);
+
+					default:
+						return this.help(channel, userstate.username);
+				}
+			} else {
+				console.log("trivia start command");
+				return this.startTrivia(channel, userstate);
+			}
+		}
+
+		if (ANSWER_COMMAND_REGEX.test(message)) {
+			console.log(`${channel}:${userstate.username} answered: ${message}`)
+			return this.checkAnswer(channel, userstate, message);
+		}
+
+		console.log(`exit no matches: ${channel}:${userstate.username} => ${message}`);
 	}
 
 	help(channel, username) {
@@ -74,13 +103,13 @@ class ChatTriviaHandler {
 				.then((data) => {
 					console.log("get user points");
 					return async.reduce(data, 0, (prev, cur, next) => {
-						if(cur.username === username) {
+						if (cur.username === username) {
 							return next(null, prev + cur.points);
 						} else {
 							return next(null, prev);
 						}
 					}, (err, result) => {
-						if(err) {
+						if (err) {
 							console.error(err);
 							return reject(err);
 						}
@@ -130,9 +159,9 @@ class ChatTriviaHandler {
 						console.log(results);
 
 
-						results.sort((a,b) => {
-							if(a.points < b.points) return 1;
-							if(a.points > b.points) return -1;
+						results.sort((a, b) => {
+							if (a.points < b.points) return 1;
+							if (a.points > b.points) return -1;
 							return 0;
 						});
 

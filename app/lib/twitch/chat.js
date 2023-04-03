@@ -7,7 +7,7 @@ let chat = null;
 function start() {
 	return new Promise((resolve, reject) => {
 		console.log("start");
-		return botdb.all()
+		return botdb.channels()
 		.then((chans) => {
 			chans = chans || [];
 			chat = new Chat({
